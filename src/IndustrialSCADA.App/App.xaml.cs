@@ -138,6 +138,21 @@ public partial class App
             await dataCollector.StartAsync();
             System.Diagnostics.Debug.WriteLine("[App] DataCollector started");
 
+            // 5. 启动历史数据持久化桥接（Rx DataStream → SQLite 批量写入）
+            var historyBridge = Container.Resolve<HistoryDataBridge>();
+            historyBridge.Start();
+            System.Diagnostics.Debug.WriteLine("[App] HistoryDataBridge started");
+
+            // 6. 启动报警持久化桥接（AlarmStream → SQLite）
+            var alarmBridge = Container.Resolve<AlarmPersistenceBridge>();
+            alarmBridge.Start();
+            System.Diagnostics.Debug.WriteLine("[App] AlarmPersistenceBridge started");
+
+            // 7. 启动模拟报警生成器（基于采集数据阈值触发报警）
+            var demoAlarms = Container.Resolve<DemoAlarmGenerator>();
+            demoAlarms.Start();
+            System.Diagnostics.Debug.WriteLine("[App] DemoAlarmGenerator started");
+
             System.Diagnostics.Debug.WriteLine("[App] OnInitialized OK");
         }
         catch (Exception ex)

@@ -30,5 +30,14 @@ public static class ServiceCollectionExtensions
 
         // 注册 PLC 模拟器 (Singleton)
         containerRegistry.RegisterSingleton<PlcSimulator>();
+
+        // 注册历史数据桥接服务 (Singleton)
+        containerRegistry.RegisterSingleton<HistoryDataBridge>();
+
+        // 注册报警持久化桥接 (Singleton) —— 订阅报警流并写入 SQLite
+        containerRegistry.RegisterSingleton<AlarmPersistenceBridge>();
+
+        // 注册演示报警生成器 (Singleton) —— 订阅数据流，阈值越限时自动生成报警
+        containerRegistry.RegisterSingleton<DemoAlarmGenerator>();
     }
 }
