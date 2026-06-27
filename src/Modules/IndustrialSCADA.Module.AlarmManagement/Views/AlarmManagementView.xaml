@@ -1,0 +1,334 @@
+<UserControl x:Class="IndustrialSCADA.Module.AlarmManagement.Views.AlarmManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:coreConv="clr-namespace:IndustrialSCADA.Core.Converters;assembly=IndustrialSCADA.Core"
+             xmlns:enums="clr-namespace:IndustrialSCADA.Core.Enums;assembly=IndustrialSCADA.Core">
+
+    <UserControl.Resources>
+        <coreConv:NullableDateTimeConverter x:Key="NullableDateTimeConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- ============================================================
+                 TOP: Summary cards
+                 ============================================================ -->
+            <UniformGrid Grid.Row="0" Columns="4">
+
+                <!-- Total Alarms -->
+                <materialDesign:Card Margin="4" Padding="16">
+                    <StackPanel>
+                        <DockPanel LastChildFill="False">
+                            <materialDesign:PackIcon Kind="AlarmBell" Width="28" Height="28"
+                                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock DockPanel.Dock="Right" Text="Total Alarms"
+                                       FontSize="13" Opacity="0.6" VerticalAlignment="Center"
+                                       Margin="8,0,0,0" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding TotalCount}"
+                                   FontSize="36" FontWeight="Bold" Margin="0,4,0,0" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Active Alarms -->
+                <materialDesign:Card Margin="4" Padding="16">
+                    <StackPanel>
+                        <DockPanel LastChildFill="False">
+                            <materialDesign:PackIcon Kind="Alert" Width="28" Height="28"
+                                                     Foreground="{DynamicResource ValidationErrorBrush}"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock DockPanel.Dock="Right" Text="Active Alarms"
+                                       FontSize="13" Opacity="0.6" VerticalAlignment="Center"
+                                       Margin="8,0,0,0" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding ActiveCount}"
+                                   FontSize="36" FontWeight="Bold" Margin="0,4,0,0"
+                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Acknowledged -->
+                <materialDesign:Card Margin="4" Padding="16">
+                    <StackPanel>
+                        <DockPanel LastChildFill="False">
+                            <materialDesign:PackIcon Kind="AlertCircle" Width="28" Height="28"
+                                                     Foreground="Orange"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock DockPanel.Dock="Right" Text="Acknowledged"
+                                       FontSize="13" Opacity="0.6" VerticalAlignment="Center"
+                                       Margin="8,0,0,0" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding UnhandledCount}"
+                                   FontSize="36" FontWeight="Bold" Margin="0,4,0,0"
+                                   Foreground="Orange" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Cleared -->
+                <materialDesign:Card Margin="4" Padding="16">
+                    <StackPanel>
+                        <DockPanel LastChildFill="False">
+                            <materialDesign:PackIcon Kind="CheckCircle" Width="28" Height="28"
+                                                     Foreground="Green"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock DockPanel.Dock="Right" Text="Cleared"
+                                       FontSize="13" Opacity="0.6" VerticalAlignment="Center"
+                                       Margin="8,0,0,0" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding Path=DataContext.TotalCount, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   FontSize="36" FontWeight="Bold" Margin="0,4,0,0"
+                                   Foreground="Green" Opacity="0.5" />
+                    </StackPanel>
+                </materialDesign:Card>
+            </UniformGrid>
+
+            <!-- ============================================================
+                 MIDDLE: Filter bar
+                 ============================================================ -->
+            <materialDesign:Card Grid.Row="2" Padding="16" Margin="4">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right"
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Margin="8,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock Text="Refresh" Margin="4,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox Width="160"
+                                  SelectedItem="{Binding SelectedSeverity}"
+                                  materialDesign:HintAssist.Hint="Severity"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  Margin="0,0,8,0">
+                            <ComboBox.Items>
+                                <x:Null />
+                                <enums:AlarmSeverity>Info</enums:AlarmSeverity>
+                                <enums:AlarmSeverity>Warning</enums:AlarmSeverity>
+                                <enums:AlarmSeverity>Critical</enums:AlarmSeverity>
+                                <enums:AlarmSeverity>Emergency</enums:AlarmSeverity>
+                            </ComboBox.Items>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="All Severity" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <ComboBox Width="160"
+                                  SelectedItem="{Binding SelectedState}"
+                                  materialDesign:HintAssist.Hint="State"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                            <ComboBox.Items>
+                                <x:Null />
+                                <enums:AlarmState>Active</enums:AlarmState>
+                                <enums:AlarmState>Acknowledged</enums:AlarmState>
+                                <enums:AlarmState>Cleared</enums:AlarmState>
+                            </ComboBox.Items>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="All States" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </DockPanel>
+            </materialDesign:Card>
+
+            <!-- ============================================================
+                 BOTTOM: Alarm DataGrid
+                 ============================================================ -->
+            <materialDesign:Card Grid.Row="4" Padding="8" Margin="4">
+                <DataGrid ItemsSource="{Binding Alarms}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          SelectionMode="Single"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          materialDesign:DataGridAssist.CellPadding="8 4"
+                          materialDesign:DataGridAssist.ColumnHeaderPadding="8 8">
+
+                    <!-- Center cell content vertically -->
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell"
+                               BasedOn="{StaticResource {x:Type DataGridCell}}">
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <DataGrid.Columns>
+
+                        <!-- Time -->
+                        <DataGridTemplateColumn Header="Time" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TriggeredAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
+                                               VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Tag Name -->
+                        <DataGridTextColumn Header="Tag Name"
+                                            Binding="{Binding TagName}"
+                                            Width="130" />
+
+                        <!-- Severity (colored foreground) -->
+                        <DataGridTemplateColumn Header="Severity" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Severity}" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="Gray" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Severity}"
+                                                                 Value="{x:Static enums:AlarmSeverity.Critical}">
+                                                        <Setter Property="Foreground" Value="Red" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Severity}"
+                                                                 Value="{x:Static enums:AlarmSeverity.Emergency}">
+                                                        <Setter Property="Foreground" Value="DarkRed" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Severity}"
+                                                                 Value="{x:Static enums:AlarmSeverity.Warning}">
+                                                        <Setter Property="Foreground" Value="Orange" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Severity}"
+                                                                 Value="{x:Static enums:AlarmSeverity.Info}">
+                                                        <Setter Property="Foreground" Value="DodgerBlue" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- State -->
+                        <DataGridTemplateColumn Header="State" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding State}" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="Gray" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding State}"
+                                                                 Value="{x:Static enums:AlarmState.Active}">
+                                                        <Setter Property="Foreground" Value="Red" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding State}"
+                                                                 Value="{x:Static enums:AlarmState.Acknowledged}">
+                                                        <Setter Property="Foreground" Value="Orange" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding State}"
+                                                                 Value="{x:Static enums:AlarmState.Cleared}">
+                                                        <Setter Property="Foreground" Value="Green" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Message -->
+                        <DataGridTextColumn Header="Message"
+                                            Binding="{Binding Message}"
+                                            Width="*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextWrapping" Value="Wrap" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Acknowledged Time -->
+                        <DataGridTemplateColumn Header="Acknowledged" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding AcknowledgedAt, Converter={StaticResource NullableDateTimeConverter}}"
+                                               VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+
+                    <!-- Row context menu -->
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow"
+                               BasedOn="{StaticResource {x:Type DataGridRow}}">
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Acknowledge"
+                                                  Command="{Binding DataContext.AcknowledgeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  CommandParameter="{Binding}">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="AlertCircle" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Handle"
+                                                  Command="{Binding DataContext.HandleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  CommandParameter="{Binding}">
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="CheckCircle" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                </DataGrid>
+            </materialDesign:Card>
+
+        </Grid>
+    </ScrollViewer>
+</UserControl>

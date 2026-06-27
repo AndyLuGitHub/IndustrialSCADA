@@ -1,0 +1,201 @@
+<UserControl x:Class="IndustrialSCADA.Module.LogViewer.Views.LogViewerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Level Filter -->
+                <ComboBox Grid.Column="0"
+                          Width="120"
+                          materialDesign:HintAssist.Hint="Level"
+                          SelectedItem="{Binding SelectedLevel, Mode=TwoWay}"
+                          Margin="0,0,8,0">
+                    <ComboBoxItem Content="All" />
+                    <ComboBoxItem Content="Debug" />
+                    <ComboBoxItem Content="Information" />
+                    <ComboBoxItem Content="Warning" />
+                    <ComboBoxItem Content="Error" />
+                    <ComboBoxItem Content="Fatal" />
+                </ComboBox>
+
+                <!-- Search Box -->
+                <TextBox Grid.Column="1"
+                         Width="200"
+                         materialDesign:HintAssist.Hint="Search"
+                         Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,8,0">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+                            <Setter Property="materialDesign:TextFieldAssist.LeadingIcon" Value="Search" />
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <!-- Refresh Button -->
+                <Button Grid.Column="3"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="Refresh"
+                        Command="{Binding RefreshCommand}"
+                        Margin="0,0,4,0">
+                    <materialDesign:PackIcon Kind="Refresh" />
+                </Button>
+
+                <!-- Clear Button -->
+                <Button Grid.Column="4"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="Clear"
+                        Command="{Binding ClearCommand}"
+                        Margin="0,0,4,0">
+                    <materialDesign:PackIcon Kind="Delete" />
+                </Button>
+
+                <!-- Auto Refresh Toggle -->
+                <CheckBox Grid.Column="5"
+                          Content="Auto Refresh"
+                          IsChecked="{Binding AutoRefresh, Mode=TwoWay}"
+                          Margin="8,0,8,0"
+                          VerticalAlignment="Center" />
+
+                <!-- Export Button -->
+                <Button Grid.Column="6"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="Export to CSV"
+                        Command="{Binding ExportCommand}"
+                        Margin="0,0,0,0">
+                    <materialDesign:PackIcon Kind="Export" />
+                </Button>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Log Entries DataGrid -->
+        <materialDesign:Card Grid.Row="1" Margin="0,0,0,8" Padding="0">
+            <DataGrid ItemsSource="{Binding LogEntries}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionMode="Extended"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserReorderColumns="True"
+                      CanUserResizeColumns="True"
+                      CanUserResizeRows="False"
+                      CanUserSortColumns="True"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Timestamp"
+                                        Binding="{Binding Timestamp, StringFormat=yyyy-MM-dd HH:mm:ss.fff}"
+                                        Width="160"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontFamily" Value="Consolas" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="Margin" Value="4,0,4,0" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTemplateColumn Header="Level" Width="100" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Padding="4,2" CornerRadius="3" Background="Transparent">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                    <Setter Property="Background" Value="#FFEB5757" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="Fatal">
+                                                    <Setter Property="Background" Value="#FFEB5757" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="Warning">
+                                                    <Setter Property="Background" Value="#FFF2994A" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="Information">
+                                                    <Setter Property="Background" Value="#FF2D9CDB" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="Debug">
+                                                    <Setter Property="Background" Value="#FF828282" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding Level}"
+                                               Foreground="White"
+                                               FontWeight="Medium"
+                                               FontSize="11"
+                                               HorizontalAlignment="Center" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Source"
+                                        Binding="{Binding Source}"
+                                        Width="150"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="Margin" Value="4,0,4,0" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Message"
+                                        Binding="{Binding Message}"
+                                        Width="*"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextWrapping" Value="Wrap" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="Margin" Value="4,0,4,0" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </materialDesign:Card>
+
+        <!-- Status Bar -->
+        <materialDesign:Card Grid.Row="2" Padding="8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <materialDesign:PackIcon Kind="FileDocumentOutline"
+                                         Width="16"
+                                         Height="16"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0" />
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="Entries:" FontWeight="Medium" />
+                    <Run Text="{Binding EntryCount, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

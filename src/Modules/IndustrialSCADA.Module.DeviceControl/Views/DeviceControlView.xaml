@@ -1,0 +1,282 @@
+<UserControl x:Class="IndustrialSCADA.Module.DeviceControl.Views.DeviceControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:enums="clr-namespace:IndustrialSCADA.Core.Enums;assembly=IndustrialSCADA.Core">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="200" />
+            <RowDefinition Height="16" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ════════════════════════════════════════════════════════════
+             TOP: Device list DataGrid
+             ════════════════════════════════════════════════════════════ -->
+        <materialDesign:Card Grid.Row="0" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                    <materialDesign:PackIcon Kind="Devices" Width="24" Height="24"
+                                             Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                             VerticalAlignment="Center" />
+                    <TextBlock Text="Device List"
+                               FontSize="16" FontWeight="Medium"
+                               VerticalAlignment="Center" Margin="8,0,0,0" />
+                    <Button DockPanel.Dock="Right"
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            HorizontalAlignment="Right"
+                            ToolTip="Refresh device list">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" VerticalAlignment="Center" />
+                            <TextBlock Text="Refresh" Margin="4,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </DockPanel>
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Devices}"
+                          SelectedItem="{Binding SelectedDevice}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          HeadersVisibility="Column"
+                          materialDesign:DataGridAssist.CellPadding="8 4"
+                          materialDesign:DataGridAssist.ColumnHeaderPadding="8 4">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name"
+                                            Binding="{Binding Name}"
+                                            Width="140" />
+                        <DataGridTextColumn Header="Protocol"
+                                            Binding="{Binding ProtocolType}"
+                                            Width="100" />
+                        <DataGridTextColumn Header="Address"
+                                            Binding="{Binding ConnectionAddress}"
+                                            Width="160" />
+                        <DataGridTemplateColumn Header="Status" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock x:Name="StatusText"
+                                               Text="{Binding Status}"
+                                               FontWeight="Medium"
+                                               Foreground="Gray" />
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Status}"
+                                                     Value="{x:Static enums:DeviceStatus.Online}">
+                                            <Setter TargetName="StatusText" Property="Foreground"
+                                                    Value="#2E7D32" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}"
+                                                     Value="{x:Static enums:DeviceStatus.Offline}">
+                                            <Setter TargetName="StatusText" Property="Foreground"
+                                                    Value="#C62828" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}"
+                                                     Value="{x:Static enums:DeviceStatus.Fault}">
+                                            <Setter TargetName="StatusText" Property="Foreground"
+                                                    Value="#EF6C00" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}"
+                                                     Value="{x:Static enums:DeviceStatus.Maintenance}">
+                                            <Setter TargetName="StatusText" Property="Foreground"
+                                                    Value="#1565C0" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Scan Interval (ms)"
+                                            Binding="{Binding ScanIntervalMs}"
+                                            Width="130" />
+                        <DataGridTemplateColumn Header="Enabled" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsEnabled, Mode=OneWay}"
+                                              IsHitTestVisible="False"
+                                              HorizontalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Last Communication"
+                                            Binding="{Binding LastCommunicationAt, StringFormat=HH:mm:ss}"
+                                            Width="150" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- ════════════════════════════════════════════════════════════
+             BOTTOM ROW: Connection + Read/Write panels
+             ════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ── Middle Left: Connection panel ──────────────────── -->
+            <materialDesign:Card Grid.Column="0" Padding="16">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="Connection" Width="24" Height="24"
+                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Connection"
+                                   FontSize="16" FontWeight="Medium"
+                                   VerticalAlignment="Center" Margin="8,0,0,0" />
+                    </DockPanel>
+
+                    <!-- Selected device info -->
+                    <TextBlock Margin="0,0,0,8" Opacity="0.7">
+                        <Run Text="Selected: " />
+                        <Run Text="{Binding SelectedDevice.Name, FallbackValue=(none), TargetNullValue=(none)}"
+                             FontWeight="Medium" />
+                    </TextBlock>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <TextBlock Text="Connected: " Opacity="0.7" />
+                        <TextBlock FontWeight="Medium">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="No" />
+                                    <Setter Property="Foreground" Value="#C62828" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                            <Setter Property="Text" Value="Yes" />
+                                            <Setter Property="Foreground" Value="#2E7D32" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Connect / Disconnect buttons -->
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding ConnectCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Margin="0,0,8,0"
+                                ToolTip="Connect to selected device">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plug" VerticalAlignment="Center" />
+                                <TextBlock Text="Connect" Margin="4,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding DisconnectCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Margin="0,0,8,0"
+                                ToolTip="Disconnect from selected device"
+                                materialDesign:ButtonAssist.CornerRadius="4">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="PowerPlugOff" VerticalAlignment="Center" />
+                                <TextBlock Text="Disconnect" Margin="4,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <!-- ── Middle Right: Manual Read/Write panel ──────────── -->
+            <materialDesign:Card Grid.Column="2" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Section header -->
+                    <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="DatabaseSearch" Width="24" Height="24"
+                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Manual Read / Write"
+                                   FontSize="16" FontWeight="Medium"
+                                   VerticalAlignment="Center" Margin="8,0,0,0" />
+                    </DockPanel>
+
+                    <!-- Read row -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Read Address:"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" Opacity="0.7" />
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding ReadAddress, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.Hint="e.g. DB1.DBW0"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Margin="0,0,8,0"
+                                 VerticalAlignment="Center" />
+                        <Button Grid.Column="2"
+                                Command="{Binding ReadCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Margin="0,0,8,0"
+                                ToolTip="Read from address">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="DatabaseSearch" VerticalAlignment="Center" />
+                                <TextBlock Text="Read" Margin="4,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <TextBox Grid.Column="3"
+                                 Text="{Binding ReadResult, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 materialDesign:HintAssist.Hint="Result"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Write row -->
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Write Address:"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" Opacity="0.7" />
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding WriteAddress, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.Hint="e.g. DB1.DBW0"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Margin="0,0,8,0"
+                                 VerticalAlignment="Center" />
+                        <TextBox Grid.Column="2"
+                                 Text="{Binding WriteValue, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.Hint="Value"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Margin="0,0,8,0"
+                                 VerticalAlignment="Center" />
+                        <Button Grid.Column="3"
+                                Command="{Binding WriteCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                ToolTip="Write value to address">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="DatabaseEdit" VerticalAlignment="Center" />
+                                <TextBlock Text="Write" Margin="4,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</UserControl>

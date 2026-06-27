@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <Description>Industrial SCADA - Application Shell (WPF startup)</Description>
+    <ApplicationIcon />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
+    <PackageReference Include="Prism.Wpf" Version="9.0.537" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
+    <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Serilog" Version="4.1.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IndustrialSCADA.Core\IndustrialSCADA.Core.csproj" />
+    <ProjectReference Include="..\IndustrialSCADA.Infrastructure\IndustrialSCADA.Infrastructure.csproj" />
+    <ProjectReference Include="..\IndustrialSCADA.DeviceCore\IndustrialSCADA.DeviceCore.csproj" />
+    <ProjectReference Include="..\Modules\IndustrialSCADA.Module.Dashboard\IndustrialSCADA.Module.Dashboard.csproj" />
+    <ProjectReference Include="..\Modules\IndustrialSCADA.Module.DeviceControl\IndustrialSCADA.Module.DeviceControl.csproj" />
+    <ProjectReference Include="..\Modules\IndustrialSCADA.Module.DataAcquisition\IndustrialSCADA.Module.DataAcquisition.csproj" />
+    <ProjectReference Include="..\Modules\IndustrialSCADA.Module.AlarmManagement\IndustrialSCADA.Module.AlarmManagement.csproj" />
+    <ProjectReference Include="..\Modules\IndustrialSCADA.Module.LogViewer\IndustrialSCADA.Module.LogViewer.csproj" />
+  </ItemGroup>
+</Project>

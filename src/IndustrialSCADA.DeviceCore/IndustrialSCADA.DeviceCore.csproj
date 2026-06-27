@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Industrial SCADA - Device abstraction and built-in simulators</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IndustrialSCADA.Core\IndustrialSCADA.Core.csproj" />
+    <ProjectReference Include="..\IndustrialSCADA.Infrastructure\IndustrialSCADA.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Prism IoC abstractions -->
+    <PackageReference Include="Prism.Core" Version="9.0.537" />
+    <!-- Reactive Extensions -->
+    <PackageReference Include="System.Reactive" Version="6.0.1" />
+    <!-- Logging abstractions -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+</Project>

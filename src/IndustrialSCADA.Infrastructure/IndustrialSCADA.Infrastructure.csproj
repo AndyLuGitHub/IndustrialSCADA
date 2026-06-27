@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Industrial SCADA - Infrastructure (protocol adapters, storage, logging)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IndustrialSCADA.Core\IndustrialSCADA.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- S7 Protocol -->
+    <PackageReference Include="S7netplus" Version="0.20.0" />
+    <!-- Modbus -->
+    <PackageReference Include="FluentModbus" Version="5.2.0" />
+    <!-- OPC UA -->
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.374.126" />
+    <!-- Beckhoff ADS -->
+    <PackageReference Include="Beckhoff.TwinCAT.Ads" Version="6.2.244" />
+    <!-- EF Core + SQLite -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- Serilog -->
+    <PackageReference Include="Serilog" Version="4.1.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <!-- Reactive Extensions -->
+    <PackageReference Include="System.Reactive" Version="6.0.1" />
+    <!-- Prism IoC abstractions -->
+    <PackageReference Include="Prism.Core" Version="9.0.537" />
+    <!-- Logging abstractions -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+</Project>

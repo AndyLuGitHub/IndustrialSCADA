@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Industrial SCADA - Prism Module: Device Control</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Prism.Wpf" Version="9.0.537" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\IndustrialSCADA.Core\IndustrialSCADA.Core.csproj" />
+    <ProjectReference Include="..\..\IndustrialSCADA.DeviceCore\IndustrialSCADA.DeviceCore.csproj" />
+  </ItemGroup>
+</Project>

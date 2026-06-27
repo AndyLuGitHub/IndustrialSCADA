@@ -1,0 +1,264 @@
+<UserControl x:Class="IndustrialSCADA.Module.DataAcquisition.Views.DataAcquisitionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:vm="clr-namespace:IndustrialSCADA.Module.DataAcquisition.ViewModels">
+    <UserControl.Resources>
+        <!-- Quality cell style: Green for good (>=192), Red for bad -->
+        <Style x:Key="QualityCellStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Quality}" Value="192">
+                    <Setter Property="Foreground" Value="Green" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <!-- Left panel: tag browser -->
+            <ColumnDefinition Width="250" />
+            <!-- Center + bottom -->
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ════════════════════ LEFT PANEL ════════════════════ -->
+        <materialDesign:Card Grid.Column="0" Margin="0,0,8,0" Padding="8">
+            <DockPanel>
+                <!-- Header -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                    <materialDesign:PackIcon Kind="DatabaseSync" Width="24" Height="24"
+                                             VerticalAlignment="Center"
+                                             Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="Tag Browser" FontSize="16" FontWeight="Medium"
+                               VerticalAlignment="Center" Margin="8,0,0,0" />
+                    <Button DockPanel.Dock="Right"
+                            Command="{Binding LoadTagsCommand}"
+                            ToolTip="Refresh tags"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            Margin="8,0,0,0">
+                        <materialDesign:PackIcon Kind="Refresh" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Tag list -->
+                <ListBox ItemsSource="{Binding AvailableTags}"
+                         SelectedItem="{Binding SelectedTag}"
+                         materialDesign:HintAssist.Hint="Select a tag..."
+                         BorderThickness="1"
+                         BorderBrush="{DynamicResource MaterialDesignDivider}" />
+            </DockPanel>
+        </materialDesign:Card>
+
+        <!-- ════════════════════ RIGHT AREA ════════════════════ -->
+        <Grid Grid.Column="1" Margin="8,0,0,0">
+            <Grid.RowDefinitions>
+                <!-- Tab control area -->
+                <RowDefinition Height="*" />
+                <!-- Chart area -->
+                <RowDefinition Height="280" />
+            </Grid.RowDefinitions>
+
+            <!-- ──── Tab Control ──── -->
+            <TabControl Grid.Row="0" materialDesign:ColorZoneAssist.Mode="PrimaryLight">
+                <!-- Tab 1: Real-time Data -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="DatabaseSearch" Width="18" Height="18"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock Text="Real-time Data" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <Grid Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Counter display -->
+                        <TextBlock Grid.Row="0" Margin="0,0,0,4">
+                            <Run Text="Updates received: " />
+                            <Run Text="{Binding RealtimeCount, Mode=OneWay}" FontWeight="Bold" />
+                        </TextBlock>
+
+                        <!-- Real-time DataGrid -->
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding RealtimeData}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  HeadersVisibility="Column"
+                                  materialDesign:DataGridAssist.CellPadding="8 4"
+                                  materialDesign:DataGridAssist.ColumnHeaderPadding="8 6"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Tag Name"
+                                                    Binding="{Binding TagName}" Width="*" />
+                                <DataGridTextColumn Header="Address"
+                                                    Binding="{Binding Address}" Width="120" />
+                                <DataGridTextColumn Header="Value"
+                                                    Binding="{Binding CurrentValue}" Width="120" />
+                                <DataGridTemplateColumn Header="Quality" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Quality}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="Red" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Quality}" Value="192">
+                                                                <Setter Property="Foreground" Value="Green" />
+                                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Unit"
+                                                    Binding="{Binding Unit}" Width="60" />
+                                <DataGridTextColumn Header="Updated"
+                                                    Binding="{Binding UpdatedAt, StringFormat='HH:mm:ss'}" Width="90" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- Tab 2: Historical Data -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="History" Width="18" Height="18"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock Text="Historical Data" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <Grid Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Filter bar -->
+                        <materialDesign:Card Grid.Row="0" Padding="12,8" Margin="0,0,0,8">
+                            <WrapPanel VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                                    <materialDesign:PackIcon Kind="Calendar" Width="18" Height="18"
+                                                             VerticalAlignment="Center" Margin="0,0,4,0" />
+                                    <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                    <DatePicker SelectedDate="{Binding HistoryFrom}"
+                                                Width="140"
+                                                materialDesign:HintAssist.Hint="Start time" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                                    <materialDesign:PackIcon Kind="Calendar" Width="18" Height="18"
+                                                             VerticalAlignment="Center" Margin="0,0,4,0" />
+                                    <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                    <DatePicker SelectedDate="{Binding HistoryTo}"
+                                                Width="140"
+                                                materialDesign:HintAssist.Hint="End time" />
+                                </StackPanel>
+
+                                <Button Command="{Binding QueryHistoryCommand}"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Margin="0,0,16,0">
+                                    <Button.Content>
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="DatabaseSearch" Width="18" Height="18"
+                                                                     VerticalAlignment="Center" />
+                                            <TextBlock Text=" Query" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
+
+                                <TextBlock VerticalAlignment="Center" Opacity="0.7">
+                                    <Run Text="Records: " />
+                                    <Run Text="{Binding HistoryCount, Mode=OneWay}" FontWeight="Bold" />
+                                </TextBlock>
+                            </WrapPanel>
+                        </materialDesign:Card>
+
+                        <!-- Historical DataGrid -->
+                        <DataGrid Grid.Row="2"
+                                  ItemsSource="{Binding HistoryData}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  HeadersVisibility="Column"
+                                  materialDesign:DataGridAssist.CellPadding="8 4"
+                                  materialDesign:DataGridAssist.ColumnHeaderPadding="8 6"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Tag Name"
+                                                    Binding="{Binding TagName}" Width="*" />
+                                <DataGridTextColumn Header="Value"
+                                                    Binding="{Binding Value}" Width="120" />
+                                <DataGridTemplateColumn Header="Quality" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Quality}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="Red" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Quality}" Value="192">
+                                                                <Setter Property="Foreground" Value="Green" />
+                                                                <Setter Property="FontWeight" Value="SemiBold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Timestamp"
+                                                    Binding="{Binding Timestamp, StringFormat='yyyy-MM-dd HH:mm:ss'}"
+                                                    Width="180" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+
+            <!-- ──── Trend Chart ──── -->
+            <materialDesign:Card Grid.Row="1" Padding="12,8" Margin="0,8,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                        <materialDesign:PackIcon Kind="ChartLine" Width="20" Height="20"
+                                                 VerticalAlignment="Center"
+                                                 Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                        <TextBlock Text="Historical Trend" FontSize="14" FontWeight="Medium"
+                                   VerticalAlignment="Center" Margin="6,0,0,0" />
+                        <TextBlock Text="{Binding SelectedTag, StringFormat=' - {0}'}"
+                                   FontSize="14" Opacity="0.7"
+                                   VerticalAlignment="Center" Margin="4,0,0,0" />
+                    </StackPanel>
+
+                    <lvc:CartesianChart Grid.Row="1"
+                                        Series="{Binding HistorySeries}"
+                                        XAxes="{Binding HistoryXAxes}"
+                                        YAxes="{Binding HistoryYAxes}"
+                                        MinHeight="180" />
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</UserControl>
